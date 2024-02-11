@@ -1,9 +1,12 @@
+// Global scoped variable to store transformed sample data
+
 var transformedSampleData;
+
+// Global scoped variable to store metadata
 var metaDataList;
 
 // URL to retrieve data
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json";
-
 
 
 // Retrieve data from the URL
@@ -12,24 +15,28 @@ d3.json(url, init).then((data) => {
 
 });
 
+// Init function called after downloading the data
 function init(data) {
 
-    console.log(data);
-    console.log(data['samples'].length);
-
+    console.log("Data retrieved: ", data);
+    
     metaDataList = data.metadata;
 
     transformedSampleData = transformData(data);
-    console.log(transformedSampleData.length);
-    console.log(transformedSampleData);
+    
+    console.log("Transformed Sample Data: ", transformedSampleData);
 
+    // Populate Test Subject ID Nos. dropdown
     populateSubjectIdNos();
 
+    // Draw Bar Chart
     drawBarChart(transformedSampleData[0]);
 
+    // Draw Bubble Chart
     drawBubbleChart(transformedSampleData[0]);
     
-    displayDemographicInfo(metaDataList[0]);
+    // Display Initial Demographic Info
+    displayInitialDemographicInfo(metaDataList[0]);
     
 }
 
@@ -56,12 +63,10 @@ function transformData(data) {
         return samples_list;
     });
 
-    console.log("samples=", samples);
-
     // Sort each sample list based on sample_value
     const samplesSorted = samples.map(s => s.sort((a, b) => { b.sample_value - a.sample_value })).filter(s => (!s.id || /^\s*$/.test(s.id)));
 
-    // Create a sample with top ten OTUs with otu_ids, otu_labels and sample_values separated in a list
+    // Create a sample with otu_ids, otu_labels and sample_values separated in a list
     const sampleTopTenOTUs = samplesSorted.map(s => {
         let otu_ids = [];
         let otu_labels = [];
@@ -85,6 +90,7 @@ function transformData(data) {
     return sampleTopTenOTUs;
 }
 
+// Create drop down for Test Subject ID Nos.
 function populateSubjectIdNos() {
     transformedSampleData.map(data => {
         const option = d3.select("#selDataset").append("option");
@@ -93,36 +99,47 @@ function populateSubjectIdNos() {
     });
 }
 
-
+// Draw Bar chart
 function drawBarChart(sample) {
 
     var data = [{
         type: 'bar',
         x: sample.sample_values.slice(0,10).reverse(),
         y: sample.otu_ids.slice(0, 10).map(id => 'OTU ' + id).reverse(),
+        text: sample.otu_labels.slice(0,10).reverse(),
         orientation: 'h'
     }];
 
-    Plotly.newPlot('bar', data);
+    var layout = {
+        xaxis: {
+            zeroline: false,
+            showline: false,
+            showticklabels: true,
+          },
+    }
+    Plotly.newPlot('bar', data, layout);
 }
 
+// Update Bar chart
 function updateBarChart(sample) {
 
     Plotly.restyle("bar", "x", [sample.sample_values.slice(0,10).reverse()]);
     Plotly.restyle("bar", "y", [sample.otu_ids.slice(0,10).map(id => 'OTU ' + id).reverse()]);
+    Plotly.restyle("bar", "text", [sample.otu_labels.slice(0,10).reverse()]);
 }
 
+// Draw Bubble chart
 function drawBubbleChart(sample) {
 
     var trace1 = {
         x: sample.otu_ids,
         y: sample.sample_values,
+        text: sample.otu_labels,
         mode: 'markers',
         marker: {
           size: sample.sample_values,
           color: sample.otu_ids,
-          text: sample.otu_labels
-        }
+          }
       };
       
       var data = [trace1];
@@ -137,9 +154,9 @@ function drawBubbleChart(sample) {
       };
       
       Plotly.newPlot('bubble', data, layout);
-      
 }
 
+// Update Bubble chart
 function updateBubbleChart(sample) {
 
     Plotly.restyle("bubble", "x", [sample.otu_ids]);
@@ -147,11 +164,12 @@ function updateBubbleChart(sample) {
 
     Plotly.restyle("bubble", "marker.size", [sample.sample_values]);
     Plotly.restyle("bubble", "marker.color", [sample.otu_ids]);
-    Plotly.restyle("bubble", "marker.text", [sample.otu_labels]);
+    Plotly.restyle("bubble", "text", [sample.otu_labels]);
 
 }
 
-function displayDemographicInfo(metaData) {
+// Display initial Demographic Info
+function displayInitialDemographicInfo(metaData) {
 
     const table = d3.select("#sample-metadata").append('table');
     table.attr("class", "table table-borderless");
@@ -188,6 +206,7 @@ function displayDemographicInfo(metaData) {
     wfreq.text("wfreq: " + metaData['wfreq']);
 }
 
+// Update Demographic Info
 function updateDemographicInfo(metaData) {
 
     d3.select("#demographic-id").text("id: " + metaData['id']);
@@ -200,12 +219,19 @@ function updateDemographicInfo(metaData) {
 
 }
 
+// Update the plots and demographic info when a new sample is selected
 function optionChanged(value) {
-    console.log('selected ', value);
+
     transformedSampleData.filter(sample => sample.id === value).map(sample => {
+
+        // Update Bar Chart
         updateBarChart(sample);
+        
+        // Update Bubble Chart
         updateBubbleChart(sample);
     });
+
+    // Update Demographic Information
     metaDataList.filter(metaData => metaData.id == value)
                 .map(metaData => updateDemographicInfo(metaData));
 }
