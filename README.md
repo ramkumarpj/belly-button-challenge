@@ -16,7 +16,7 @@ A dropdown is setup to select the test subjects
 The demographic section is updated with the info of the test subject
 
 ### OTU Bar chart
-The OTU bar chart displays top 10 OTUs
+The OTU bar chart displays top 10 OTUs of the test subject selected.
 
 ### Bubble Chart
 The bubbile chart displays the entire OTU dataset with OTU frequency determining the bubble size.
