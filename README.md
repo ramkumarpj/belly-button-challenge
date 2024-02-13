@@ -19,7 +19,7 @@ The demographic section is updated with the info of the test subject
 The OTU bar chart displays top 10 OTUs of the test subject selected.
 
 ### Bubble Chart
-The bubbile chart displays the entire OTU dataset with OTU frequency determining the bubble size.
+The bubbile chart displays the entire OTU dataset of a test subject, with OTU frequency determining the bubble size.
 
 ## Files
 
