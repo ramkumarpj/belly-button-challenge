@@ -23,7 +23,7 @@ The bubbile chart displays the entire OTU dataset of a test subject, with OTU fr
 
 ## Files
 
-* index.html - HTML file\
+* index.html - HTML file
 * static/js/app.js - Java script file that contains logic to build the dynamic components of the dashboard
 
 ## Dashboard:
